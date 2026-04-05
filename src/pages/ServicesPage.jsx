@@ -1,285 +1,141 @@
-import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import reactLogo from '../assets/image.png'
-import { fetchAllServices, fetchServicePlans } from '../services/services.api'
+import { fetchAllServices, fetchServiceById } from '../services/services.api'
 
-export default function ServiceDetailWebDev() {
-    const { slug } = useParams()
-    const [service, setService] = useState(null)
-    const [plans, setPlans] = useState([])
+const imgEllipse = reactLogo
+const defaultIcon = reactLogo
+
+export default function ServicesPage() {
+    const [services, setServices] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
 
     useEffect(() => {
-        const fetchServiceAndPlans = async () => {
+        const fetchData = async () => {
             try {
-                setLoading(true)
+                const res = await fetchAllServices();
 
-                // Fetch all services using the imported function
-                const allServices = await fetchAllServices()
+                const data = res?.data || res;
 
-                // Find service by slug (or ID)
-                let serviceId = slug
-                let foundService = null
+                const activeServices = Array.isArray(data)
+                    ? data.filter(item => item.active === true)
+                    : [];
 
-                // Try to find service by ID first
-                foundService = allServices.find(s => s.id === slug)
+                setServices(activeServices);
 
-                if (foundService) {
-                    serviceId = foundService.id
-                    setService(foundService)
-                } else {
-                    // If not found by ID, try to find by slug
-                    foundService = allServices.find(s => s.slug === slug)
-                    if (foundService) {
-                        serviceId = foundService.id
-                        setService(foundService)
-                    } else {
-                        throw new Error(`Service with identifier "${slug}" not found`)
-                    }
-                }
-
-                // Fetch plans for this service using the imported function
-                if (serviceId) {
-                    try {
-                        const plansData = await fetchServicePlans(serviceId)
-                        setPlans(plansData || [])
-                    } catch (err) {
-                        console.warn('Failed to fetch plans:', err)
-                        setPlans([])
-                    }
-                }
-            } catch (err) {
-                console.error('Fetch error:', err)
-                setError(err.message)
-                setService(null)
-                setPlans([])
+            } catch (error) {
+                console.log(error);
+                setError(error);
             } finally {
-                setLoading(false)
+                setLoading(false);
             }
-        }
+        };
 
-        if (slug) {
-            fetchServiceAndPlans()
-        } else {
-            setError('No service specified')
-            setLoading(false)
-        }
-    }, [slug])
-
-    // Helper function to format price
-    const formatPrice = (price, currency, billingPeriod) => {
-        if (!price && price !== 0) return 'Contact for pricing'
-
-        const formatter = new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: currency || 'USD',
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0
-        })
-
-        const formattedPrice = formatter.format(price)
-        return billingPeriod ? `${formattedPrice}/${billingPeriod}` : formattedPrice
-    }
-
-    // Helper function to parse features
-    const parseFeatures = (features) => {
-        if (!features) return []
-        if (Array.isArray(features)) return features
-        if (typeof features === 'string') {
-            try {
-                const parsed = JSON.parse(features)
-                return Array.isArray(parsed) ? parsed : [features]
-            } catch (e) {
-                return features.split(',').map(f => f.trim()).filter(f => f)
-            }
-        }
-        return []
-    }
-
-    // Loading state
-    if (loading) {
-        return (
-            <>
-                <Navbar />
-                <main className="page">
-                    <div className="loading-container" style={{
-                        textAlign: 'center',
-                        padding: '100px 20px',
-                        fontSize: '18px',
-                        color: 'var(--color-text-muted)'
-                    }}>
-                        Loading service details...
-                    </div>
-                </main>
-                <Footer />
-            </>
-        )
-    }
-
-    // Error state
-    if (error || !service) {
-        return (
-            <>
-                <Navbar />
-                <main className="page">
-                    <div className="error-container" style={{
-                        textAlign: 'center',
-                        padding: '100px 20px',
-                        color: '#ef4444'
-                    }}>
-                        <h2>Error loading service</h2>
-                        <p>{error || 'Service not found'}</p>
-                        <Link to="/services" style={{
-                            color: 'var(--color-teal)',
-                            textDecoration: 'underline',
-                            marginTop: '20px',
-                            display: 'inline-block'
-                        }}>
-                            ← Back to Services
-                        </Link>
-                    </div>
-                </main>
-                <Footer />
-            </>
-        )
-    }
-
-    // No plans state
-    const hasPlans = plans && plans.length > 0
+        fetchData();
+    }, []);
 
     return (
         <>
             <Navbar />
             <main className="page">
-                <section className="svc-detail-hero">
-                    <h1 className="svc-detail-hero__title">
-                        <span>{service?.title?.toUpperCase() || 'SERVICE'}</span>
-                    </h1>
-                    <p className="svc-detail-hero__desc">{service?.shortDescription}</p>
-                    {service?.longDescription && (
-                        <p className="svc-detail-hero__long-desc">{service.longDescription}</p>
-                    )}
+                <section className="services-page-hero" style={{ paddingTop: '20px' }}>
+                    <div className="services-page-hero__content">
+                        <h1 className="services-page-hero__title">
+                            OUR <span>SERVICES</span>
+                        </h1>
+                        <p className="services-page-hero__subtitle">
+                            Choose from our range of solutions. Each plan comes with flexible pricing options.
+                        </p>
+                    </div>
+
+                    <div style={{
+                        display: error ? 'none' : 'block',
+                        marginTop: '50px'
+                    }}>
+                        <h2 className="services-page-tagline__heading">
+                            Choose what's <span className="gradient-text">best</span> for you
+                        </h2>
+                        <p className="services-page-tagline__sub">
+                            Flexible packages designed for startups, growing businesses, and enterprise-grade applications.
+                        </p>
+                    </div>
                 </section>
 
-                <section className="svc-detail-plans">
-                    <h2 className="svc-detail-plans__title">
-                        {hasPlans ? 'Pricing Plans' : 'Service Information'}
-                    </h2>
 
-                    {!hasPlans && !loading && (
-                        <div style={{ textAlign: 'center', padding: '60px 20px' }}>
-                            <p style={{ color: 'var(--color-text-muted)', marginBottom: '20px' }}>
-                                No pricing plans available for this service yet.
+
+                <section style={{
+                    display: error ? 'none' : 'block'
+                }}>
+                    <div className="services-page-grid__container" style={{ marginBottom: '50px' }}>
+
+                        {loading && <div className="loading-state">Loading services...</div>}
+
+                        {!loading && !error && services.map(service => (
+                            <div key={service.id} className="svc-card">
+                                <div
+                                    className="svc-card__ellipse"
+                                    aria-hidden="true"
+                                />
+
+                                <div className="svc-card__body">
+                                    <h3 className="svc-card__title">{service.title}</h3>
+                                    <p className="svc-card__desc">{service.shortDescription}</p>
+                                    <Link
+                                        to={`/services/${service.id}`}
+                                        className="svc-card__cta"
+                                        onClick={() => localStorage.setItem('selectedService', JSON.stringify(service))}
+                                    >
+                                        Get Your Quote
+                                        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="16" height="16">
+                                            <path d="M4 10h12M10 4l6 6-6 6" />
+                                        </svg>
+                                    </Link>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+
+
+                {error && (
+                    <div style={{
+                        position: 'relative',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        zIndex: 9999,
+                        pointerEvents: 'none'
+                    }}>
+                        <div style={{
+                            background: 'rgba(255, 255, 255, 0.1)',
+                            backdropFilter: 'blur(10px)',
+                            borderRadius: '16px',
+                            padding: '24px 32px',
+                            textAlign: 'center',
+                            border: '1px solid rgba(255, 255, 255, 0.2)',
+                            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                            maxWidth: '400px',
+                            margin: '20px'
+                        }}>
+                            <p style={{
+                                color: 'white',
+                                margin: 0,
+                                fontSize: '16px',
+                                fontWeight: '500',
+                                textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)'
+                            }}>
+                                Error: {typeof error === 'string' ? error : error?.message || 'Something went wrong'}
                             </p>
-                            <Link to="/services/consultation" className="plan-card__cta">
-                                Contact us for pricing
-                            </Link>
                         </div>
-                    )}
-
-                    {hasPlans && (
-                        <div className="svc-detail-plans__grid">
-                            {plans
-                                .filter(plan => plan.isActive !== false)
-                                .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))
-                                .map((plan) => {
-                                    const features = parseFeatures(plan.features)
-                                    const price = formatPrice(plan.price, plan.currency, plan.billingPeriod)
-
-                                    return (
-                                        <div
-                                            key={plan.id || plan.planName}
-                                            className={`plan-card ${plan.isFeatured ? 'featured-plan' : ''}`}
-                                            style={plan.isFeatured ? {
-                                                border: '2px solid var(--color-teal)',
-                                                transform: 'scale(1.02)',
-                                                boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
-                                                position: 'relative'
-                                            } : {}}
-                                        >
-                                            {plan.isFeatured && (
-                                                <div className="featured-badge" style={{
-                                                    position: 'absolute',
-                                                    top: '12px',
-                                                    right: '12px',
-                                                    background: 'var(--color-teal)',
-                                                    color: 'white',
-                                                    padding: '4px 12px',
-                                                    borderRadius: '20px',
-                                                    fontSize: '12px',
-                                                    fontWeight: 'bold',
-                                                    zIndex: 1
-                                                }}>
-                                                    Featured
-                                                </div>
-                                            )}
-
-                                            <div className="plan-card__header">
-                                                <img
-                                                    src={service?.icon || reactLogo}
-                                                    alt={plan.planName}
-                                                    className="plan-card__icon"
-                                                    style={{ width: '48px', height: '48px', objectFit: 'contain' }}
-                                                    onError={e => e.target.src = reactLogo}
-                                                />
-                                                <h3 className="plan-card__tier">{plan.planName}</h3>
-                                                <p className="plan-card__price">{price}</p>
-                                                {plan.priceType === 'custom' && (
-                                                    <p className="plan-card__price-type" style={{
-                                                        fontSize: '12px',
-                                                        color: 'var(--color-text-dim)',
-                                                        marginTop: '4px'
-                                                    }}>
-                                                        Custom pricing available
-                                                    </p>
-                                                )}
-                                            </div>
-
-                                            {plan.description && (
-                                                <p className="plan-card__description" style={{
-                                                    fontSize: '14px',
-                                                    color: 'var(--color-text-muted)',
-                                                    margin: '16px 0',
-                                                    padding: '0 20px',
-                                                    textAlign: 'center'
-                                                }}>
-                                                    {plan.description}
-                                                </p>
-                                            )}
-
-                                            <div className="plan-card__body">
-                                                {features.length > 0 && (
-                                                    <ul className="plan-card__features">
-                                                        {features.map((feature, index) => (
-                                                            <li key={index} className="plan-card__feature">
-                                                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2">
-                                                                    <path d="M13.333 4L6 11.333L2.667 8" strokeLinecap="round" strokeLinejoin="round" />
-                                                                </svg>
-                                                                {feature}
-                                                            </li>
-                                                        ))}
-                                                    </ul>
-                                                )}
-                                            </div>
-
-                                            <div className="plan-card__footer">
-                                                <Link
-                                                    to={`/services/consultation?plan=${plan.id}&service=${service?.id}`}
-                                                    className="plan-card__cta"
-                                                    state={{ plan, service }}
-                                                >
-                                                    Choose Plan
-                                                </Link>
-                                            </div>
-                                        </div>
-                                    )
-                                })}
-                        </div>
-                    )}
-                </section>
+                    </div>
+                )}
             </main>
             <Footer />
         </>

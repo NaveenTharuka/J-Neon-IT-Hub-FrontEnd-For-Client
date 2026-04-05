@@ -3,6 +3,7 @@ import { api } from './api'
 export const fetchAllServices = async () => {
   try {
     const response = await api.get('/api/services/all');
+    console.log(response);
     return response.data;
   } catch (error) {
     console.error('Error fetching all services:', error);
