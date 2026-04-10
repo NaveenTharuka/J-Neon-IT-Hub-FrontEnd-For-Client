@@ -167,7 +167,7 @@ export default function PortfolioPage() {
         fetchProjects();
     }, []);
 
-    const displayProjects = dynamicProjects.length > 0 ? dynamicProjects : projects;
+    const displayProjects = loading ? [] : (dynamicProjects.length > 0 ? dynamicProjects : projects);
 
     return (
         <>
@@ -187,7 +187,12 @@ export default function PortfolioPage() {
                 </section>
 
                 {/* ── Projects ── */}
-                {displayProjects.map((project, i) => {
+                {loading && (
+                    <div className="fade-in" style={{ textAlign: 'center', padding: '50px 0', color: 'var(--color-text-muted)' }}>
+                        Loading portfolio items...
+                    </div>
+                )}
+                {!loading && displayProjects.map((project, i) => {
                     const CardComp = cardComponents[project.cardType] || cardComponents.cyber
 
                     const VisualContent = () => (

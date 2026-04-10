@@ -12,17 +12,22 @@ export default function useScrollFadeIn() {
             },
             { threshold: 0.12 }
         );
-        
-        // Timeout to allow dynamic components to render before observing
-        const timeoutId = setTimeout(() => {
-            const targets = document.querySelectorAll('.fade-in');
+        const observeTargets = () => {
+            const targets = document.querySelectorAll('.fade-in:not(.visible)');
             targets.forEach(t => observer.observe(t));
-        }, 100);
+        };
+
+        observeTargets();
+
+        const mutationObserver = new MutationObserver(() => {
+            observeTargets();
+        });
+
+        mutationObserver.observe(document.body, { childList: true, subtree: true });
 
         return () => {
-            clearTimeout(timeoutId);
-            const targets = document.querySelectorAll('.fade-in');
-            targets.forEach(t => observer.unobserve(t));
+            mutationObserver.disconnect();
+            observer.disconnect();
         };
     }, []);
 }
