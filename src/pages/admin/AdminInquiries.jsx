@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Calendar, Mail, Phone, Trash2 } from 'lucide-react';
 import styles from './adminInquiries.module.css';
+import { api } from '../../services/api';
 
 export default function AdminInquiries() {
   const [inquiries, setInquiries] = useState([]);
@@ -26,13 +27,9 @@ const sortedInquiries = [...inquiries].sort((a, b) => {
 
   const fetchInquiries = async () => {
     try {
-      const res = await fetch("http://localhost:8080/contact/get-all", {
-        credentials: "include"
+      const { data } = await api.get('/contact/get-all', {
+        withCredentials: true
       });
-
-      if (!res.ok) throw new Error("Server error");
-
-      const data = await res.json();
 
       if (Array.isArray(data)) {
         setInquiries(data);
@@ -50,16 +47,10 @@ const sortedInquiries = [...inquiries].sort((a, b) => {
 
   const updateInquiryStatus = async (id, status) => {
     try {
-      const res = await fetch("http://localhost:8080/contact/tags", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ id, status })
-      });
-
-      if (!res.ok) throw new Error("Failed to update");
-
-      const updated = await res.json();
+      const { data: updated } = await api.put("/contact/tags", 
+        { id, status },
+        { withCredentials: true }
+      );
 
       // update list instantly
       setInquiries(prev =>
@@ -74,12 +65,9 @@ const sortedInquiries = [...inquiries].sort((a, b) => {
 
 const handleDelete = async (id) => {
   try {
-    const res = await fetch(`http://localhost:8080/contact/delete/${id}`, {
-      method: "DELETE",
-      credentials: "include"
+    await api.delete(`/contact/delete/${id}`, {
+      withCredentials: true
     });
-
-    if (!res.ok) throw new Error("Failed to delete");
 
     // remove from UI instantly
     setInquiries(prev => prev.filter(i => i.id !== id));
