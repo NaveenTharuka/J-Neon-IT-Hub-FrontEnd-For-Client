@@ -70,7 +70,10 @@ export default function AdminLayout({ children }) {
                     <button
                         className={styles.logoutBtn}
                         aria-label="Logout"
-                        onClick={() => navigate('/')}
+                        onClick={() => {
+                            localStorage.removeItem('user');
+                            navigate('/');
+                        }}
                     >
                         <LogOut size={20} />
                     </button>
