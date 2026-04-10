@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Calendar, Mail, Phone, Trash2 } from 'lucide-react';
 import styles from './adminInquiries.module.css';
-import { api } from '../../services/api';
+import { fetchAllContacts, updateContactTag, deleteContact } from '../../services/contact.api';
 
 export default function AdminInquiries() {
   const [inquiries, setInquiries] = useState([]);
@@ -27,9 +27,7 @@ const sortedInquiries = [...inquiries].sort((a, b) => {
 
   const fetchInquiries = async () => {
     try {
-      const { data } = await api.get('/contact/get-all', {
-        withCredentials: true
-      });
+      const data = await fetchAllContacts();
 
       if (Array.isArray(data)) {
         setInquiries(data);
@@ -47,10 +45,7 @@ const sortedInquiries = [...inquiries].sort((a, b) => {
 
   const updateInquiryStatus = async (id, status) => {
     try {
-      const { data: updated } = await api.put("/contact/tags", 
-        { id, status },
-        { withCredentials: true }
-      );
+      const updated = await updateContactTag(id, status);
 
       // update list instantly
       setInquiries(prev =>
@@ -65,9 +60,7 @@ const sortedInquiries = [...inquiries].sort((a, b) => {
 
 const handleDelete = async (id) => {
   try {
-    await api.delete(`/contact/delete/${id}`, {
-      withCredentials: true
-    });
+    await deleteContact(id);
 
     // remove from UI instantly
     setInquiries(prev => prev.filter(i => i.id !== id));
