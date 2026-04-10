@@ -41,7 +41,7 @@ export default function ServicesPage() {
         <>
             <Navbar />
             <main className="page">
-                <section className="services-page-hero" style={{ paddingTop: '20px' }}>
+                <section className="services-page-hero">
                     <div className="services-page-hero__content">
                         <h1 className="services-page-hero__title">
                             OUR <span>SERVICES</span>
