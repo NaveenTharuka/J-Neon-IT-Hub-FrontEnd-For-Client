@@ -139,9 +139,9 @@ img {
 .navbar__cta {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
   background: var(--color-teal-dark);
-  color: #000;
+  color: #fafafa;
   font-family: var(--font-paytone);
   font-size: clamp(11px, 1.1vw, 14px);
   padding: 10px 22px;

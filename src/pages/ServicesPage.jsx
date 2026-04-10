@@ -4,11 +4,13 @@ import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import reactLogo from '../assets/image.png'
 import { fetchAllServices, fetchServiceById } from '../services/services.api'
+import useScrollFadeIn from '../hooks/useScrollFadeIn'
 
 const imgEllipse = reactLogo
 const defaultIcon = reactLogo
 
 export default function ServicesPage() {
+    useScrollFadeIn();
     const [services, setServices] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
@@ -42,7 +44,7 @@ export default function ServicesPage() {
             <Navbar />
             <main className="page">
                 <section className="services-page-hero">
-                    <div className="services-page-hero__content">
+                    <div className="services-page-hero__content fade-in">
                         <h1 className="services-page-hero__title">
                             OUR <span>SERVICES</span>
                         </h1>
@@ -51,7 +53,7 @@ export default function ServicesPage() {
                         </p>
                     </div>
 
-                    <div style={{
+                    <div className="fade-in" style={{
                         display: error ? 'none' : 'block',
                         marginTop: '50px'
                     }}>
@@ -69,7 +71,7 @@ export default function ServicesPage() {
                 <section style={{
                     display: error ? 'none' : 'block'
                 }}>
-                    <div className="services-page-grid__container" style={{ marginBottom: '50px' }}>
+                    <div className="services-page-grid__container fade-in" style={{ marginBottom: '50px' }}>
 
                         {loading && <div className="loading-state">Loading services...</div>}
 

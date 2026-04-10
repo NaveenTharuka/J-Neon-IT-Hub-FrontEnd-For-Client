@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import { getPortfolioItems, getPortfolioImages } from '../services/portfolioService'
+import useScrollFadeIn from '../hooks/useScrollFadeIn'
 
 const imgCheckmark = "http://localhost:3845/assets/0ccf5697b7ad90af92894ea1fb9741db5ca8be25.svg"
 
@@ -119,6 +120,7 @@ function StudioCard() {
 const cardComponents = { cyber: CyberCard, cloud: CloudCard, studio: StudioCard }
 
 export default function PortfolioPage() {
+    useScrollFadeIn();
     const [dynamicProjects, setDynamicProjects] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -173,7 +175,7 @@ export default function PortfolioPage() {
             <main className="page">
                 {/* ── Hero ── */}
                 <section className="portfolio-page-hero">
-                    <div className="portfolio-page-hero__content">
+                    <div className="portfolio-page-hero__content fade-in">
                         <h1 className="portfolio-page-hero__title">
                             OUR <span>PORTFOLIO</span>
                         </h1>
@@ -200,7 +202,7 @@ export default function PortfolioPage() {
 
                     return (
                         <section key={project.id || i} className={`pf-section pf-section--${project.side}`} style={{ '--accent': project.accentColor }}>
-                            <div className="pf-section__container">
+                            <div className="pf-section__container fade-in">
                                 {project.side === 'right' ? (
                                     <>
                                         <div className="pf-section__visual"><VisualContent /></div>
