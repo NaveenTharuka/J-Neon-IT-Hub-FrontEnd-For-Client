@@ -16,7 +16,7 @@ export default function AdminUsers() {
 
   const fetchUsers = async () => {
     try {
-      const res = await api.get("/admin/users", {
+      const res = await api.get("api/admin/users", {
         withCredentials: true
       });
 
@@ -75,7 +75,7 @@ export default function AdminUsers() {
     if (!window.confirm("Delete this user?")) return;
 
     try {
-      await api.delete(`/admin/delete/${id}`, {
+      await api.delete(`api/admin/delete/${id}`, {
         withCredentials: true
       });
 
