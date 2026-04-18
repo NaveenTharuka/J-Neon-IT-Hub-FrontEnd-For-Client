@@ -1,7 +1,47 @@
+import { useState } from 'react';
 import { Check, ChevronDown } from 'lucide-react';
 import './Contact.css';
+import { createContact } from '../services/contact.api';
 
 export default function Contact() {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    service: '',
+    message: ''
+  });
+  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState(null);
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!formData.email.includes('@')) {
+      setStatus('error');
+      return;
+    }
+    setLoading(true);
+    setStatus(null);
+    try {
+      await createContact({
+        name: formData.name,
+        email: formData.email,
+        message: formData.message
+      });
+      setStatus('success');
+      setFormData({ name: '', email: '', service: '', message: '' });
+    } catch (error) {
+      setStatus('error');
+    }
+    setLoading(false);
+  };
+
   const benefits = [
     "Free initial consultation",
     "Custom architecture & roadmap",
@@ -35,30 +75,45 @@ export default function Contact() {
         </div>
 
         <div className="contact__form-wrapper">
-          <form className="contact__form" onSubmit={(e) => e.preventDefault()}>
-            <input type="text" placeholder="Full Name" className="contact__input" />
-            <input type="email" placeholder="Email Address" className="contact__input" />
+          <form className="contact__form" onSubmit={handleSubmit}>
+            <input type="text" name="name" value={formData.name} onChange={handleChange} placeholder="Full Name" className="contact__input" required />
+            <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="Email Address" className="contact__input" required />
             
             <div className="contact__select-wrapper">
-              <select className="contact__input contact__select" defaultValue="">
+              <select name="service" value={formData.service} onChange={handleChange} className="contact__input contact__select" required>
                 <option value="" disabled hidden>Select Project Type</option>
-                <option value="web">Web Development</option>
-                <option value="cloud">Cloud Migration</option>
-                <option value="cyber">Cybersecurity</option>
-                <option value="other">Other</option>
+                <option value="Cyber Defense">Cyber Defense</option>
+                <option value="Cloud Migration">Cloud Migration</option>
+                <option value="Digital Studio">Digital Studio</option>
+                <option value="Other">Other</option>
               </select>
               <ChevronDown className="contact__select-icon" size={20} color="#6b7280" />
             </div>
 
             <textarea 
+              name="message"
+              value={formData.message}
+              onChange={handleChange}
               placeholder="Describe your project requirements..." 
               className="contact__input contact__textarea"
               rows={4}
+              required
             ></textarea>
             
-            <button type="submit" className="contact__submit">
-              Request Consultation
+            <button type="submit" className="contact__submit" disabled={loading}>
+              {loading ? 'Sending...' : 'Request Consultation'}
             </button>
+
+            {status === 'success' && (
+                <p className="form-success" style={{ marginTop: '1rem', color: '#2ebfa5' }}>
+                    Message sent successfully!
+                </p>
+            )}
+            {status === 'error' && (
+                <p className="form-error" style={{ marginTop: '1rem', color: '#ef4444' }}>
+                    Something went wrong. Please try again.
+                </p>
+            )}
           </form>
         </div>
 
